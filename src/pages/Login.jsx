@@ -11,17 +11,39 @@ export default function Login({ jugadores = [], onLogin, onAdmin }) {
     <Container maxWidth="xs" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '80vh' }}>
       <Paper elevation={24} sx={{ p: 4, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid #333' }}>
         
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-          <Box sx={{ bgcolor: 'primary.main', p: 2, borderRadius: '50%', boxShadow: '0 0 20px rgba(249,115,22,0.4)' }}>
-            <Trophy size={40} color="#000" />
-          </Box>
-        </Box>
+<Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+  <Box 
+    sx={{ 
+      bgcolor: 'primary.main', 
+      p: 1, // Reducimos un poco el padding para que la imagen luzca mejor
+      borderRadius: '10%', 
+      boxShadow: '0 0 20px rgba(249,115,22,0.4)',
+      width: 80, // Definimos un tamaño fijo para el contenedor
+      height: 80,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden' // Asegura que nada se salga del círculo
+    }}
+  >
+    <Box
+      component="img"
+      src="/android-chrome-192x192.png"
+      alt="Virtual Prode Logo"
+      sx={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain' // Mantiene la proporción de tu logo
+      }}
+    />
+  </Box>
+</Box>
 
         <Typography variant="h4" align="center" sx={{ fontWeight: 900, letterSpacing: -1, mb: 0.5 }}>
           Virtual.Prode
         </Typography>
         <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 4, fontWeight: 700 }}>
-          FUTSAL PRIMERA C
+          FUTSAL PRIMERA C - AFA
         </Typography>
 
         {!modoAdmin ? (

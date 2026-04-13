@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Box, Tabs, Tab, Container, IconButton } from '@mui/material';
 import { Trophy, LogOut, Settings, Calendar, Medal } from 'lucide-react';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, collection } from 'firebase/firestore';
+import { doc, onSnapshot, collection, setDoc } from 'firebase/firestore';
 import { auth, db } from './services/firebase';
 
 import Login from './pages/Login';
@@ -50,7 +50,7 @@ export default function App() {
   const [jugadores, setJugadores] = useState([]);
   const [partidos, setPartidos] = useState([]);
   const [predicciones, setPredicciones] = useState({});
-  const [config, setConfig] = useState({ cierre: "" });
+  const [config, setConfig] = useState({ cierre: "", jornadaActiva: "Fecha 1" });
 
   useEffect(() => {
     signInAnonymously(auth).catch(err => console.error(err));
@@ -63,10 +63,14 @@ export default function App() {
 
     const unsubConfig = onSnapshot(doc(db, "config", "prode"), (docSnap) => {
       if (docSnap.exists()) {
-        setJugadores(docSnap.data().jugadores || []);
-        setConfig({ cierre: docSnap.data().cierre || "" });
+        const data = docSnap.data();
+        setJugadores(data.jugadores || []);
+        setConfig({ 
+          cierre: data.cierre || "", 
+          jornadaActiva: data.jornadaActiva || "Fecha 1" 
+        });
       } else {
-        setDoc(doc(db, "config", "prode"), { jugadores: [], cierre: "" });
+        setDoc(doc(db, "config", "prode"), { jugadores: [], cierre: "", jornadaActiva: "Fecha 1" });
       }
     });
 
@@ -98,6 +102,8 @@ export default function App() {
       </ThemeProvider>
     );
   }
+
+  const tiempoExpirado = config.cierre ? new Date() > new Date(config.cierre) : false;
 
   return (
     <ThemeProvider theme={theme}>
@@ -131,7 +137,8 @@ export default function App() {
             partidos={partidos} 
             usuario={usuarioActual} 
             predicciones={predicciones[usuarioActual] || {}} 
-            cerrado={config.cierre ? new Date() > new Date(config.cierre) : false}
+            cerrado={tiempoExpirado}
+            jornadaActiva={config.jornadaActiva}
             CLUBES={CLUBES}
           />
         )}
@@ -147,6 +154,7 @@ export default function App() {
             jugadores={jugadores} 
             partidos={partidos} 
             cierre={config.cierre} 
+            jornadaActiva={config.jornadaActiva}
             CLUBES={CLUBES} 
           />
         )}

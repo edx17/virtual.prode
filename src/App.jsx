@@ -147,6 +147,7 @@ export default function App() {
             jugadores={jugadores} 
             partidos={partidos} 
             predicciones={predicciones} 
+            CLUBES={CLUBES}
           />
         )}
         {tabIndex === 2 && esAdmin && (

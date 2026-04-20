@@ -3,6 +3,7 @@ import { Box, Paper, Typography, Avatar, Stack, TableContainer, Table, TableHead
 
 export default function Tabla({ jugadores = [], partidos = [], predicciones = {}, CLUBES = [] }) {
   const [jornadaFiltro, setJornadaFiltro] = useState('Todas');
+  const [tablaFiltro, setTablaFiltro] = useState('Total');
 
   const calcularTabla = () => {
     const tabla = jugadores.map(jugador => {
@@ -10,7 +11,8 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
       const picks = predicciones[jugador] || {};
       
       partidos.forEach(p => {
-        if (p.resultadooficial && picks[p.id] === p.resultadooficial) {
+        const correspondeAFecha = tablaFiltro === 'Total' || p.jornada === tablaFiltro;
+        if (correspondeAFecha && p.resultadooficial && picks[p.id] === p.resultadooficial) {
           puntos += 3;
         }
       });
@@ -35,7 +37,29 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, pb: 10 }}>
+      
+      {/* SECCIÓN RANKING */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        
+        {/* CABECERA Y FILTRO DE RANKING */}
+        <Paper sx={{ p: 2, borderRadius: 4, bgcolor: '#111', border: '1px solid #333' }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6" sx={{ fontWeight: 900 }}>Ranking</Typography>
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <Select
+                value={tablaFiltro}
+                onChange={(e) => setTablaFiltro(e.target.value)}
+                sx={{ fontWeight: 800, bgcolor: '#000', borderRadius: 2 }}
+              >
+                <MenuItem value="Total">Total Acumulado</MenuItem>
+                {jornadasUnicas.map(j => (
+                  <MenuItem key={`rank-${j}`} value={j}>{j}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+        </Paper>
+
         {posiciones.length === 0 ? (
           <Typography align="center" color="text.secondary" sx={{ py: 6, fontWeight: 700 }}>
             No hay datos de jugadores registrados.
@@ -85,6 +109,7 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
 
       <Divider sx={{ borderColor: '#333' }} />
 
+      {/* SECCIÓN MATRIZ DE PRONÓSTICOS */}
       <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid #333' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h6" sx={{ fontWeight: 900 }}>Pronósticos</Typography>
@@ -92,11 +117,11 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
             <Select
               value={jornadaFiltro}
               onChange={(e) => setJornadaFiltro(e.target.value)}
-              sx={{ fontWeight: 800 }}
+              sx={{ fontWeight: 800, bgcolor: '#000', borderRadius: 2 }}
             >
               <MenuItem value="Todas">Todas</MenuItem>
               {jornadasUnicas.map(j => (
-                <MenuItem key={j} value={j}>{j}</MenuItem>
+                <MenuItem key={`matriz-${j}`} value={j}>{j}</MenuItem>
               ))}
             </Select>
           </FormControl>

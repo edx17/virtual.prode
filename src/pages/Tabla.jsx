@@ -7,18 +7,30 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
 
   const calcularTabla = () => {
     const tabla = jugadores.map(jugador => {
-      let puntos = 0;
+      let puntosVistaActual = 0;
+      let puntosTotales = 0;
       const picks = predicciones[jugador] || {};
       
       partidos.forEach(p => {
-        const correspondeAFecha = tablaFiltro === 'Total' || p.jornada === tablaFiltro;
-        if (correspondeAFecha && p.resultadooficial && picks[p.id] === p.resultadooficial) {
-          puntos += 3;
+        if (p.resultadooficial && picks[p.id] === p.resultadooficial) {
+          puntosTotales += 3;
+          if (tablaFiltro === 'Total' || p.jornada === tablaFiltro) {
+            puntosVistaActual += 3;
+          }
         }
       });
-      return { nombre: jugador, puntos };
+      return { nombre: jugador, puntos: puntosVistaActual, puntosTotales };
     });
-    return tabla.sort((a, b) => b.puntos - a.puntos);
+
+    return tabla.sort((a, b) => {
+      if (b.puntos !== a.puntos) {
+        return b.puntos - a.puntos;
+      }
+      if (tablaFiltro !== 'Total' && b.puntosTotales !== a.puntosTotales) {
+        return b.puntosTotales - a.puntosTotales;
+      }
+      return a.nombre.localeCompare(b.nombre);
+    });
   };
 
   const posiciones = calcularTabla();

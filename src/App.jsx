@@ -53,36 +53,46 @@ export default function App() {
   const [config, setConfig] = useState({ cierre: "", jornadaActiva: "Fecha 1" });
 
   useEffect(() => {
-    signInAnonymously(auth).catch(err => console.error(err));
+    signInAnonymously(auth)
+      .then(() => console.log("Conexión con Firebase establecida"))
+      .catch(err => console.error("Error de autenticación:", err.code));
+      
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
   }, []);
 
   useEffect(() => {
     if (!user) return;
+    
+    console.log("Token de sesión activo:", user.uid);
 
     const unsubConfig = onSnapshot(doc(db, "config", "prode"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
+        console.log("Datos de configuración recuperados:", data);
         setJugadores(data.jugadores || []);
         setConfig({ 
           cierre: data.cierre || "", 
           jornadaActiva: data.jornadaActiva || "Fecha 1" 
         });
       } else {
-        setDoc(doc(db, "config", "prode"), { jugadores: [], cierre: "", jornadaActiva: "Fecha 1" });
+        console.warn("Documento config/prode inexistente. Creando base...");
+        setDoc(doc(db, "config", "prode"), { jugadores: [], cierre: "", jornadaActiva: "Fecha 1" })
+          .catch(e => console.error("Error al inicializar documento config:", e.message));
       }
-    });
+    }, (err) => console.error("Fallo lectura CONFIG:", err.message));
 
     const unsubPartidos = onSnapshot(collection(db, "partidos"), (snap) => {
+      console.log(`Colección 'partidos': ${snap.size} documentos.`);
       setPartidos(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
+    }, (err) => console.error("Fallo lectura PARTIDOS:", err.message));
 
     const unsubPreds = onSnapshot(collection(db, "predicciones"), (snap) => {
+      console.log(`Colección 'predicciones': ${snap.size} documentos.`);
       const allPreds = {};
       snap.forEach(d => { allPreds[d.id] = d.data().picks || {}; });
       setPredicciones(allPreds);
-    });
+    }, (err) => console.error("Fallo lectura PREDICCIONES:", err.message));
 
     return () => { unsubConfig(); unsubPartidos(); unsubPreds(); };
   }, [user]);

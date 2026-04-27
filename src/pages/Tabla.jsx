@@ -23,12 +23,8 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
     });
 
     return tabla.sort((a, b) => {
-      if (b.puntos !== a.puntos) {
-        return b.puntos - a.puntos;
-      }
-      if (tablaFiltro !== 'Total' && b.puntosTotales !== a.puntosTotales) {
-        return b.puntosTotales - a.puntosTotales;
-      }
+      if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+      if (tablaFiltro !== 'Total' && b.puntosTotales !== a.puntosTotales) return b.puntosTotales - a.puntosTotales;
       return a.nombre.localeCompare(b.nombre);
     });
   };
@@ -48,22 +44,20 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
   const partidosFiltrados = jornadaFiltro === 'Todas' ? partidos : partidos.filter(p => p.jornada === jornadaFiltro);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, pb: 10 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 8 }}>
       
-      {/* SECCIÓN RANKING */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        
-        {/* CABECERA Y FILTRO DE RANKING */}
-        <Paper sx={{ p: 2, borderRadius: 4, bgcolor: '#111', border: '1px solid #333' }}>
+      {/* SECCIÓN RANKING COMPACTO */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Paper sx={{ p: 1.5, borderRadius: 3, bgcolor: '#111', border: '1px solid #333' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6" sx={{ fontWeight: 900 }}>Ranking</Typography>
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>Ranking</Typography>
+            <FormControl size="small" sx={{ minWidth: 130 }}>
               <Select
                 value={tablaFiltro}
                 onChange={(e) => setTablaFiltro(e.target.value)}
-                sx={{ fontWeight: 800, bgcolor: '#000', borderRadius: 2 }}
+                sx={{ fontWeight: 800, bgcolor: '#000', borderRadius: 2, fontSize: '0.75rem' }}
               >
-                <MenuItem value="Total">Total Acumulado</MenuItem>
+                <MenuItem value="Total">Total</MenuItem>
                 {jornadasUnicas.map(j => (
                   <MenuItem key={`rank-${j}`} value={j}>{j}</MenuItem>
                 ))}
@@ -72,64 +66,59 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
           </Stack>
         </Paper>
 
-        {posiciones.length === 0 ? (
-          <Typography align="center" color="text.secondary" sx={{ py: 6, fontWeight: 700 }}>
-            No hay datos de jugadores registrados.
-          </Typography>
-        ) : (
-          posiciones.map((fila, i) => (
-            <Paper 
-              key={fila.nombre} 
-              elevation={2}
+        {posiciones.map((fila, i) => (
+          <Paper 
+            key={fila.nombre} 
+            elevation={0}
+            sx={{ 
+              p: 1, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1.5, 
+              borderRadius: 3,
+              bgcolor: 'background.paper',
+              border: '1px solid #222'
+            }}
+          >
+            <Avatar 
               sx={{ 
-                p: 2, 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 2, 
-                borderRadius: 4,
-                bgcolor: 'background.paper',
-                border: '1px solid #222'
+                width: 32, 
+                height: 32, 
+                background: getMedalColor(i),
+                fontWeight: 900,
+                fontSize: '0.9rem',
+                color: i < 3 ? '#fff' : 'text.secondary',
+                border: i >= 3 ? '1px solid #333' : 'none'
               }}
             >
-              <Avatar 
-                sx={{ 
-                  width: 48, 
-                  height: 48, 
-                  background: getMedalColor(i),
-                  fontWeight: 900,
-                  color: i < 3 ? '#fff' : 'text.secondary',
-                  border: i >= 3 ? '1px solid #333' : 'none'
-                }}
-              >
-                {i + 1}
-              </Avatar>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>{fila.nombre}</Typography>
-              </Box>
-              <Stack alignItems="flex-end">
-                <Typography variant="h5" color="primary.main" sx={{ fontWeight: 900, lineHeight: 1 }}>
-                  {fila.puntos}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: 1 }}>
-                  PTS
-                </Typography>
-              </Stack>
-            </Paper>
-          ))
-        )}
+              {i + 1}
+            </Avatar>
+            <Typography variant="body2" sx={{ flex: 1, fontWeight: 700, fontSize: '0.9rem' }}>
+              {fila.nombre}
+            </Typography>
+            <Stack direction="row" alignItems="baseline" spacing={0.5}>
+              <Typography variant="h6" color="primary.main" sx={{ fontWeight: 900, fontSize: '1.1rem' }}>
+                {fila.puntos}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, fontSize: '0.6rem' }}>
+                PTS
+              </Typography>
+            </Stack>
+          </Paper>
+        ))}
       </Box>
 
-      <Divider sx={{ borderColor: '#333' }} />
+      <Divider sx={{ borderColor: '#333', my: 1 }} />
 
-      {/* SECCIÓN MATRIZ DE PRONÓSTICOS */}
-      <Paper sx={{ p: 2, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid #333' }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6" sx={{ fontWeight: 900 }}>Pronósticos</Typography>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
+      {/* MATRIZ DE PRONÓSTICOS OPTIMIZADA */}
+      <Paper sx={{ p: 1.5, borderRadius: 3, bgcolor: 'background.paper', border: '1px solid #333' }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>Pronósticos</Typography>
+          <FormControl size="small" sx={{ minWidth: 110 }}>
             <Select
               value={jornadaFiltro}
               onChange={(e) => setJornadaFiltro(e.target.value)}
-              sx={{ fontWeight: 800, bgcolor: '#000', borderRadius: 2 }}
+              sx={{ fontWeight: 800, bgcolor: '#000', borderRadius: 2, fontSize: '0.75rem' }}
             >
               <MenuItem value="Todas">Todas</MenuItem>
               {jornadasUnicas.map(j => (
@@ -139,14 +128,14 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
           </FormControl>
         </Stack>
 
-        <TableContainer sx={{ maxHeight: 600, border: '1px solid #222', borderRadius: 2 }}>
-          <Table stickyHeader size="small">
+        <TableContainer sx={{ maxHeight: 500, borderRadius: 2, border: '1px solid #222' }}>
+          <Table stickyHeader size="small" sx={{ '& .MuiTableCell-root': { padding: '2px 1px' } }}>
             <TableHead>
               <TableRow>
-                <TableCell align="center" sx={{ bgcolor: '#0a0a0a', borderBottom: '2px solid #333', minWidth: 50, px: 0.5 }}></TableCell>
+                <TableCell align="center" sx={{ bgcolor: '#0a0a0a', borderBottom: '2px solid #333', width: 35 }}></TableCell>
                 {jugadores.map(j => (
-                  <TableCell key={j} align="center" sx={{ bgcolor: '#0a0a0a', borderBottom: '2px solid #333', fontWeight: 900, color: '#fff', fontSize: '0.65rem', px: 0.5, py: 1, minWidth: 35 }}>
-                    {j.substring(0, 4).toUpperCase()}
+                  <TableCell key={j} align="center" sx={{ bgcolor: '#0a0a0a', borderBottom: '2px solid #333', fontWeight: 900, color: '#fff', fontSize: '0.55rem', minWidth: 40, lineHeight: 1 }}>
+                    {j.toUpperCase()}
                   </TableCell>
                 ))}
               </TableRow>
@@ -154,11 +143,10 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
             <TableBody>
               {partidosFiltrados.map(p => (
                 <TableRow key={p.id}>
-                  <TableCell align="center" sx={{ bgcolor: '#111', borderBottom: '1px solid #222', px: 0.5, py: 0.5 }}>
-                    <Stack direction="row" alignItems="center" justifyContent="center" spacing={0.5}>
-                      <Avatar src={getEscudo(p.local)} sx={{ width: 20, height: 20, bgcolor: '#000' }} variant="square">{p.local[0]}</Avatar>
-                      <Typography variant="caption" sx={{ fontWeight: 900, color: '#555', fontSize: '0.65rem' }}>VS</Typography>
-                      <Avatar src={getEscudo(p.visitante)} sx={{ width: 20, height: 20, bgcolor: '#000' }} variant="square">{p.visitante[0]}</Avatar>
+                  <TableCell align="center" sx={{ bgcolor: '#111', borderBottom: '1px solid #222' }}>
+                    <Stack direction="column" alignItems="center" spacing={0.2}>
+                      <Avatar src={getEscudo(p.local)} sx={{ width: 16, height: 16, bgcolor: '#000' }} variant="square">{p.local[0]}</Avatar>
+                      <Avatar src={getEscudo(p.visitante)} sx={{ width: 16, height: 16, bgcolor: '#000' }} variant="square">{p.visitante[0]}</Avatar>
                     </Stack>
                   </TableCell>
                   {jugadores.map(j => {
@@ -167,17 +155,17 @@ export default function Tabla({ jugadores = [], partidos = [], predicciones = {}
                     const acierto = evaluado && pick === p.resultadooficial;
                     
                     let bg = 'transparent';
-                    let col = '#666';
+                    let col = '#555';
 
                     if (evaluado) {
-                      bg = acierto ? '#166534' : '#27272a';
-                      col = acierto ? '#fff' : '#555';
+                      bg = acierto ? '#1b4332' : '#27272a';
+                      col = acierto ? '#fff' : '#666';
                     } else if (pick) {
                       col = '#f97316';
                     }
 
                     return (
-                      <TableCell key={j} align="center" sx={{ bgcolor: bg, color: col, borderBottom: '1px solid #222', fontWeight: 900, fontSize: '0.8rem', px: 0.5, py: 0.5 }}>
+                      <TableCell key={j} align="center" sx={{ bgcolor: bg, color: col, borderBottom: '1px solid #222', fontWeight: 900, fontSize: '0.7rem' }}>
                         {pick || '-'}
                       </TableCell>
                     );
